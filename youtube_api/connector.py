@@ -1,4 +1,4 @@
-import nltk
+# import nltk
 import random
 from googleapiclient.discovery import build
 
@@ -21,6 +21,4 @@ def search_youtube_videos(query):
     return video_ids
 
 def get_random_sentence_from_subtitle(subtitle):
-    sentences = nltk.sent_tokenize(subtitle)
-    random_sentence = random.choice(sentences)
-    return random_sentence
+    return random.choice(subtitle.split(' ... '))
