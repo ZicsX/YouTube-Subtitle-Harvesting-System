@@ -1,4 +1,5 @@
 # import nltk
+import re
 import random
 from googleapiclient.discovery import build
 
@@ -21,4 +22,5 @@ def search_youtube_videos(query):
     return video_ids
 
 def get_random_sentence_from_subtitle(subtitle):
-    return random.choice(subtitle.split(' ... '))
+    subList = [substring for substring in re.split(r"\s*\.\.\.\s*|\n|\xa0", subtitle) if substring]
+    return random.choice(subList)
