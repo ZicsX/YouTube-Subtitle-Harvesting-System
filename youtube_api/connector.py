@@ -1,24 +1,26 @@
+import nltk
+import random
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
-DEVELOPER_KEY = "AIzaSyCvqY5kMeG4lEdvuTLjZ-UaQWiEXyv9gvw"
-YOUTUBE_API_SERVICE_NAME = "youtube"
-YOUTUBE_API_VERSION = "v3"
 
-def youtube_search(query):
-    youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-                    developerKey=DEVELOPER_KEY)
+api_key = 'AIzaSyCvqY5kMeG4lEdvuTLjZ-UaQWiEXyv9gvw'  # Your API key
+youtube = build('youtube', 'v3', developerKey=api_key)
 
-    search_response = youtube.search().list(
+def search_youtube_videos(query):
+    search_request = youtube.search().list(
         q=query,
-        part="id,snippet",
+        part="id",
+        type="video",
+        videoCaption="closedCaption",
         maxResults=50
-    ).execute()
+    )
+    search_results = search_request.execute()
 
-    videos = []
+    video_ids = [item['id']['videoId'] for item in search_results['items']]
 
-    for search_result in search_response.get("items", []):
-        if search_result["id"]["kind"] == "youtube#video":
-            videos.append(search_result["id"]["videoId"])
+    return video_ids
 
-    return videos
+def get_random_sentence_from_subtitle(subtitle):
+    sentences = nltk.sent_tokenize(subtitle)
+    random_sentence = random.choice(sentences)
+    return random_sentence

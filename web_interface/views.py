@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from db.models import Video, Query
+from harvester.models import Video, Query
 
 def home(request):
     return render(request, 'home.html')
