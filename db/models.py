@@ -1,11 +1,20 @@
 from django.db import models
 
-class ApiKeys(models.Model):
-    key = models.CharField(max_length=100)
+class Video(models.Model):
+    video_id = models.CharField(max_length=255, primary_key=True)
+    subtitle = models.TextField(blank=True, null=True)
 
-class SearchQuery(models.Model):
-    query = models.CharField(max_length=1000)
+class Query(models.Model):
+    USED = 'U'
+    UNUSED = 'N'
+    QUERY_STATUS_CHOICES = [
+        (USED, 'Used'),
+        (UNUSED, 'Unused'),
+    ]
 
-class Subtitle(models.Model):
-    video_id = models.CharField(max_length=100)
-    subtitle_text = models.TextField()
+    query_text = models.TextField()
+    status = models.CharField(
+        max_length=2,
+        choices=QUERY_STATUS_CHOICES,
+        default=UNUSED,
+    )
