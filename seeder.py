@@ -1,6 +1,6 @@
 import os
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'web_interface.settings')  # replace with your project name
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'web_interface.settings')
 django.setup()
 
 from harvester.models import Query
