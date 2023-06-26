@@ -37,9 +37,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django.contrib.staticfiles',
-    'harvester',
-
 ]
 
 MIDDLEWARE = [
@@ -80,7 +77,7 @@ DATABASES = {
        'ENGINE': 'django.db.backends.postgresql_psycopg2',
        'NAME': 'youtube',
        'USER': 'youtubeuser',
-       'PASSWORD': '23321',
+       'PASSWORD': '2332123321',
        'HOST': 'localhost',
        'PORT': '',
    }
