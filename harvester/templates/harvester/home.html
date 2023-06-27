@@ -1,0 +1,47 @@
+<!-- harvester/templates/harvester/home.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Subtitle Harvester</title>
+</head>
+<body>
+    <h1>YouTube Subtitle Harvester</h1>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <br>
+    <label for="api_key">API Key: </label>
+    <input type="text" id="api_key">
+    <button id="update_api_key">Update API Key</button>
+    <br>
+    <div id="status"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $('#start').click(function() {
+            $.get('/start/', function() {
+                alert('Process started');
+                updateStatus();
+            });
+        });
+        $('#stop').click(function() {
+            $.get('/stop/', function() {
+                alert('Process stopped');
+                updateStatus();
+            });
+        });
+        $('#update_api_key').click(function() {
+            const api_key = $('#api_key').val();
+            $.post('/update_api_key/', JSON.stringify({ 'api_key': api_key }), function() {
+                alert('API Key Updated');
+                updateStatus();
+            });
+        });
+        function updateStatus() {
+            $.get('/status/', function(data) {
+                $('#status').html(data);
+            });
+        }
+        updateStatus();
+    </script>
+</body>
+</html>
