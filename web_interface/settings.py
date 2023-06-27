@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'django_celery_results',
     'harvester',
+    'youtubeapi',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,8 @@ DATABASES = {
 
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_RESULT_BACKEND = 'rpc://'
+broker_connection_retry_on_startup = True
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
