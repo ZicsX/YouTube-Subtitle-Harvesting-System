@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
-from youtube_api.connector import search_youtube_videos, get_random_sentence_from_subtitle
-from downloader.downloader import download_subtitles
+from youtube.connector import search_youtube_videos, get_random_sentence_from_subtitle
+from youtube.downloader import download_subtitles
 from .models import Video, Query
 
 @shared_task(bind=True, max_retries=3)
