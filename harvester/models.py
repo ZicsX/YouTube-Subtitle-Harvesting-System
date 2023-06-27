@@ -6,3 +6,6 @@ class Video(models.Model):
 
 class Query(models.Model):
     query = models.TextField()
+
+class SystemState(models.Model):
+    is_running = models.BooleanField(default=False)
