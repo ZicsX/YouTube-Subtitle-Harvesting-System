@@ -4,7 +4,7 @@ import random
 from googleapiclient.discovery import build
 
 
-api_key = 'AIzaSyCvqY5kMeG4lEdvuTLjZ-UaQWiEXyv9gvw'  # Your API key
+api_key = 'AIzaSyBa4RHKGWpNhBqIRCeWK_8MByCRY3Yc8SY'  # Your API key
 youtube = build('youtube', 'v3', developerKey=api_key)
 
 def search_youtube_videos(query):

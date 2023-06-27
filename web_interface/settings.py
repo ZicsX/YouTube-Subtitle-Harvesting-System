@@ -84,10 +84,10 @@ DATABASES = {
    }
 }
 
-# Celery
+# # Celery
 
-CELERY_BROKER_URL = 'amqp://localhost'
-CELERY_RESULT_BACKEND = 'rpc://'
+# CELERY_BROKER_URL = 'amqp://localhost'
+# CELERY_RESULT_BACKEND = 'rpc://'
 
 
 # Password validation

@@ -21,7 +21,6 @@ def download_and_save_subtitle(self, video_id):
             video = Video(video_id=video_id, subtitle=subtitle)
             video.save()  # Saving the video and subtitle to the database
             sentence = get_random_sentence_from_subtitle(subtitle)
-            print('***********************'+sentence)
             new_query = Query(query=sentence)
             new_query.save()  # Saving the new query to the database
     except Exception as exc:
