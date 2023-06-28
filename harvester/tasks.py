@@ -25,6 +25,11 @@ def search_and_download():
             try:
                 # Searching for videos using the query
                 video_ids = youtube_api.search_videos(query.query)
+                try:
+                    # Deleting the used query
+                    query.delete()
+                except Exception as e:
+                    logger.error(f"Error occurred while deleting query: {e}")
             except Exception as e:
                 logger.error(f"Error occurred while searching videos: {e}")
                 return
@@ -52,11 +57,6 @@ def search_and_download():
                 except Exception as e:
                     logger.error(f"Error occurred while processing video ID {video_id}: {e}")
                     continue
-            try:
-                # Deleting the used query
-                query.delete()
-            except Exception as e:
-                logger.error(f"Error occurred while deleting query: {e}")
         except Exception as e:
             # Handle exception
             logger.error(f"Error occurred: {e}")
