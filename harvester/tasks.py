@@ -1,14 +1,14 @@
-# harvester/tasks.py
 from celery import shared_task
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
 from .models import Video, Query, SystemState
 import random
+import logging
 
+logger = logging.getLogger(__name__)
 
 @shared_task()
 def search_and_download():
-    
     youtube_api = YouTubeAPI()
     subtitle_downloader = YouTubeSubtitleDownloader()
 
@@ -20,20 +20,20 @@ def search_and_download():
                 break
             query = Query.objects.order_by('?').first()
             if query is None:
-                print("No query found in the database. Please add queries to start harvesting subtitles.")
+                logger.warning("No query found in the database. Please add queries to start harvesting subtitles.")
                 return
             try:
                 # Searching for videos using the query
                 video_ids = youtube_api.search_videos(query.query)
             except Exception as e:
-                print(f"Error occurred while searching videos: {e}")
+                logger.error(f"Error occurred while searching videos: {e}")
                 return
 
             for video_id in video_ids:
                 # Checking if the video already exists in the database
                 video_exists = Video.objects.filter(video_id=video_id).exists()
                 if video_exists:
-                    print(f"Video ID {video_id} already exists in the database.")
+                    logger.info(f"Video ID {video_id} already exists in the database.")
                     continue
 
                 try:
@@ -50,14 +50,14 @@ def search_and_download():
                         Query.objects.create(query=new_query)
 
                 except Exception as e:
-                    print(f"Error occurred while processing video ID {video_id}: {e}")
+                    logger.error(f"Error occurred while processing video ID {video_id}: {e}")
                     continue
             try:
                 # Deleting the used query
                 query.delete()
             except Exception as e:
-                print(f"Error occurred while deleting query: {e}")
+                logger.error(f"Error occurred while deleting query: {e}")
         except Exception as e:
             # Handle exception
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             break
