@@ -147,31 +147,35 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'django_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/django.log',
-            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'formatter': 'verbose'
         },
         'harvester_file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'logs/harvester.log',
-            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/harvester.log'),
+            'formatter': 'verbose'
         },
         'celery_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/celery.log',
-            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/celery.log'),
+            'formatter': 'verbose'
         },
         'db_file': {
             'level': 'DEBUG',  # set DEBUG to log all SQL queries
             'class': 'logging.FileHandler',
-            'filename': 'logs/db.log',
-            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'logs/db.log'),
+            'formatter': 'verbose'
         },
     },
     'loggers': {
