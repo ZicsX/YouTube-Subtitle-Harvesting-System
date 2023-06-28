@@ -5,3 +5,4 @@ hindi_subtitles.csv
 **/__pycache__
 __pycache__
 logs/
+.env

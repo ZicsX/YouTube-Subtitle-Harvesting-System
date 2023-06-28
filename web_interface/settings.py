@@ -14,6 +14,8 @@ import logging
 from pathlib import Path
 import os
 import re
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,15 +81,16 @@ WSGI_APPLICATION = "web_interface.wsgi.application"
 # Database
 
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'youtube',
-       'USER': 'youtubeuser',
-       'PASSWORD': '2332123321',
-       'HOST': 'localhost',
-       'PORT': '',
-   }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT', ''),
+    }
 }
+
 
 # # Celery
 
