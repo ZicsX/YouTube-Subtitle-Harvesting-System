@@ -180,12 +180,6 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'logs/harvester.log'),
             'formatter': 'verbose'
         },
-        'celery_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/celery.log'),
-            'formatter': 'verbose'
-        },
         'db_file': {
             'level': 'DEBUG',  # set DEBUG to log all SQL queries
             'class': 'logging.FileHandler',
@@ -202,11 +196,6 @@ LOGGING = {
         'harvester': {
             'handlers': ['harvester_file'],
             'level': 'DEBUG',
-            'propagate': True,
-        },
-        'celery': {
-            'handlers': ['celery_file'],
-            'level': 'INFO',
             'propagate': True,
         },
         'django.db.backends': {
