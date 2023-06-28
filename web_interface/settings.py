@@ -94,8 +94,8 @@ DATABASES = {
 
 # # Celery
 
-CELERY_BROKER_URL = 'amqp://localhost'
-CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
 broker_connection_retry_on_startup = True
 
 
