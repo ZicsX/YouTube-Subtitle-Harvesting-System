@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import logging
 from pathlib import Path
 import os
+import re
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -139,8 +141,21 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Logging
 
+class HideSensitiveDataFilter(logging.Filter):
+    def filter(self, record):
+        if 'INSERT INTO "harvester_video"' in record.msg:
+            record.msg = re.sub(r"VALUES \(.*\);", "VALUES ([Hidden]);", record.msg)
+        elif 'INSERT INTO "harvester_query"' in record.msg:
+            record.msg = re.sub(r"VALUES \(.*\).*;", "VALUES ([Hidden]);", record.msg)
+        return True
+
 LOGGING = {
     'version': 1,
+    'filters': {
+        'hide_sensitive': {
+            '()': HideSensitiveDataFilter,
+        },
+    },
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
