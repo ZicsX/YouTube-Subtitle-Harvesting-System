@@ -1,0 +1,12 @@
+INFO 2023-06-28 09:57:11,685 autoreload 21156 17520 Watching for file changes with StatReloader
+INFO 2023-06-28 09:57:30,008 basehttp 21156 10324 "GET / HTTP/1.1" 200 1387
+INFO 2023-06-28 09:57:30,693 basehttp 21156 10324 "GET /status/ HTTP/1.1" 200 77
+INFO 2023-06-28 09:57:42,912 basehttp 21156 15852 "GET /start/ HTTP/1.1" 200 15
+INFO 2023-06-28 09:57:44,757 basehttp 21156 15852 "GET /status/ HTTP/1.1" 200 77
+INFO 2023-06-28 09:58:22,702 basehttp 21156 9432 "GET /stop/ HTTP/1.1" 200 15
+INFO 2023-06-28 09:58:23,756 basehttp 21156 9432 "GET /status/ HTTP/1.1" 200 77
+INFO 2023-06-28 09:59:20,276 basehttp 21156 10828 "GET /start/ HTTP/1.1" 200 15
+INFO 2023-06-28 09:59:21,238 basehttp 21156 10828 "GET /status/ HTTP/1.1" 200 77
+INFO 2023-06-28 10:00:49,543 basehttp 21156 14424 "GET /stop/ HTTP/1.1" 200 15
+INFO 2023-06-28 10:00:50,537 basehttp 21156 14424 "GET /status/ HTTP/1.1" 200 77
+INFO 2023-06-28 10:14:07,779 autoreload 21156 17520 C:\Users\zics\Desktop\yt_harvester\web_interface\settings.py changed, reloading.
