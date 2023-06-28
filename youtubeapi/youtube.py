@@ -2,6 +2,9 @@
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from youtubeapi.models import APIKey
+import logging
+
+logger = logging.getLogger(__name__)
 
 class YouTubeAPI:
     def __init__(self):
@@ -15,10 +18,10 @@ class YouTubeAPI:
             # Build the YouTube client
             self.youtube = build('youtube', 'v3', developerKey=api_key)
         except APIKey.DoesNotExist:
-            print("APIKey not found. Please add an API Key to the database.")
+            logger.error("APIKey not found. Please add an API Key to the database.")
             raise
         except Exception as e:
-            print(f"An error occurred while initializing the YouTube client: {str(e)}")
+            logger.error(f"An error occurred while initializing the YouTube client: {str(e)}")
             raise
 
     def search_videos(self, query):
@@ -36,12 +39,12 @@ class YouTubeAPI:
             video_ids = [item['id']['videoId'] for item in search_results['items']]
             return video_ids
         except HttpError as e:
-            print(f"A HttpError occurred while searching for videos: {str(e)}")
+            logger.error(f"A HttpError occurred while searching for videos: {str(e)}")
             if e.resp.status == 403:  # If the API quota is exhausted
-                print("API quota is exhausted. Please update the API Key.")
+                logger.warning("API quota is exhausted. Please update the API Key.")
             raise
         except Exception as e:
-            print(f"An error occurred while searching for videos: {str(e)}")
+            logger.error(f"An error occurred while searching for videos: {str(e)}")
             raise
 
     def check_hindi_captions(self, video_id):
@@ -58,10 +61,10 @@ class YouTubeAPI:
                     return True
             return False
         except HttpError as e:
-            print(f"A HttpError occurred while checking for Hindi captions: {str(e)}")
+            logger.error(f"A HttpError occurred while checking for Hindi captions: {str(e)}")
             if e.resp.status == 403:  # If the API quota is exhausted
-                print("API quota is exhausted. Please update the API Key.")
+                logger.warning("API quota is exhausted. Please update the API Key.")
             raise
         except Exception as e:
-            print(f"An error occurred while checking for Hindi captions: {str(e)}")
+            logger.error(f"An error occurred while checking for Hindi captions: {str(e)}")
             raise
