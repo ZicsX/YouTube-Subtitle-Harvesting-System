@@ -1,5 +1,8 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
+import logging
+
+logger = logging.getLogger(__name__)
 
 class YouTubeSubtitleDownloader:
     def __init__(self):
@@ -12,11 +15,11 @@ class YouTubeSubtitleDownloader:
             full_transcript = ' ... '.join(entry['text'] for entry in transcript)
             return full_transcript
         except TranscriptsDisabled:
-            print(f"Transcripts are disabled for video ID: {video_id}")
+            logger.warning(f"Transcripts are disabled for video ID: {video_id}")
             raise
         except NoTranscriptFound:
-            print(f"No transcript found for video ID: {video_id}")
+            logger.warning(f"No transcript found for video ID: {video_id}")
             raise
         except Exception as e:
-            print(f"An error occurred while downloading the subtitle: {str(e)}")
+            logger.error(f"An error occurred while downloading the subtitle: {str(e)}")
             raise
