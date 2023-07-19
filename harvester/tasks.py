@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task()
 def search_and_download():
     youtube_api = YouTubeAPI()
@@ -18,9 +19,11 @@ def search_and_download():
             state = SystemState.objects.first()
             if state is None or not state.is_running:
                 break
-            query = Query.objects.order_by('?').first()
+            query = Query.objects.order_by("?").first()
             if query is None:
-                logger.warning("No query found in the database. Please add queries to start harvesting subtitles.")
+                logger.warning(
+                    "No query found in the database. Please add queries to start harvesting subtitles."
+                )
                 return
             try:
                 # Searching for videos using the query
@@ -55,7 +58,9 @@ def search_and_download():
                         Query.objects.create(query=new_query)
 
                 except Exception as e:
-                    logger.error(f"Error occurred while processing video ID {video_id}: {e}")
+                    logger.error(
+                        f"Error occurred while processing video ID {video_id}: {e}"
+                    )
                     continue
         except Exception as e:
             # Handle exception

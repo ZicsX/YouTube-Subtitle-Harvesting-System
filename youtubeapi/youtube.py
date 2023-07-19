@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class YouTubeAPI:
     def __init__(self):
         self.youtube = None
@@ -15,12 +16,14 @@ class YouTubeAPI:
         try:
             api_key = APIKey.objects.last().key
             # Build the YouTube client
-            self.youtube = build('youtube', 'v3', developerKey=api_key)
+            self.youtube = build("youtube", "v3", developerKey=api_key)
         except APIKey.DoesNotExist:
             logger.error("APIKey not found. Please add an API Key to the database.")
             raise
         except Exception as e:
-            logger.error(f"An error occurred while initializing the YouTube client: {str(e)}")
+            logger.error(
+                f"An error occurred while initializing the YouTube client: {str(e)}"
+            )
             raise
 
     def search_videos(self, query):
@@ -30,12 +33,12 @@ class YouTubeAPI:
                 part="id",
                 type="video",
                 videoCaption="closedCaption",
-                maxResults=50
+                maxResults=50,
             )
             # Executing the search request
             search_results = search_request.execute()
             # Extracting video IDs
-            video_ids = [item['id']['videoId'] for item in search_results['items']]
+            video_ids = [item["id"]["videoId"] for item in search_results["items"]]
             return video_ids
         except HttpError as e:
             logger.error(f"A HttpError occurred while searching for videos: {str(e)}")
@@ -49,21 +52,27 @@ class YouTubeAPI:
     def check_hindi_captions(self, video_id):
         try:
             captions_request = self.youtube.captions().list(
-                part="snippet",
-                videoId=video_id
+                part="snippet", videoId=video_id
             )
             # Executing the captions request
             captions_results = captions_request.execute()
             # Checking if any of the captions are in Hindi and are manually created
-            for caption in captions_results['items']:
-                if caption['snippet']['language'] == 'hi' and caption['snippet']['trackKind'] == 'standard':
+            for caption in captions_results["items"]:
+                if (
+                    caption["snippet"]["language"] == "hi"
+                    and caption["snippet"]["trackKind"] == "standard"
+                ):
                     return True
             return False
         except HttpError as e:
-            logger.error(f"A HttpError occurred while checking for Hindi captions: {str(e)}")
+            logger.error(
+                f"A HttpError occurred while checking for Hindi captions: {str(e)}"
+            )
             if e.resp.status == 403:  # If the API quota is exhausted
                 logger.warning("API quota is exhausted. Please update the API Key.")
             raise
         except Exception as e:
-            logger.error(f"An error occurred while checking for Hindi captions: {str(e)}")
+            logger.error(
+                f"An error occurred while checking for Hindi captions: {str(e)}"
+            )
             raise

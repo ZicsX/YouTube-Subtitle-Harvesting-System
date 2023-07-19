@@ -15,6 +15,7 @@ from pathlib import Path
 import os
 import re
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,9 +43,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django_celery_results',
-    'harvester',
-    'youtubeapi',
+    "django_celery_results",
+    "harvester",
+    "youtubeapi",
 ]
 
 MIDDLEWARE = [
@@ -81,21 +82,21 @@ WSGI_APPLICATION = "web_interface.wsgi.application"
 # Database
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', ''),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT", ""),
     }
 }
 
 
 # # Celery
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
 broker_connection_retry_on_startup = True
 
 
@@ -144,6 +145,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Logging
 
+
 class HideSensitiveDataFilter(logging.Filter):
     def filter(self, record):
         if 'INSERT INTO "harvester_video"' in record.msg:
@@ -152,59 +154,60 @@ class HideSensitiveDataFilter(logging.Filter):
             record.msg = re.sub(r"VALUES \(.*\).*;", "VALUES ([Hidden]);", record.msg)
         return True
 
+
 LOGGING = {
-    'version': 1,
-    'filters': {
-        'hide_sensitive': {
-            '()': HideSensitiveDataFilter,
+    "version": 1,
+    "filters": {
+        "hide_sensitive": {
+            "()": HideSensitiveDataFilter,
         },
     },
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'django_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
-            'formatter': 'verbose'
-        },
-        'harvester_file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/harvester.log'),
-            'formatter': 'verbose'
-        },
-        'db_file': {
-            'level': 'DEBUG',  # set DEBUG to log all SQL queries
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/db.log'),
-            'formatter': 'verbose'
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['django_file'],
-            'level': 'INFO',
-            'propagate': True,
+    "handlers": {
+        "django_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/django.log"),
+            "formatter": "verbose",
         },
-        'harvester': {
-            'handlers': ['harvester_file'],
-            'level': 'DEBUG',
-            'propagate': True,
+        "harvester_file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/harvester.log"),
+            "formatter": "verbose",
         },
-        'django.db.backends': {
-            'handlers': ['db_file'],
-            'level': 'DEBUG',
-            'propagate': False,  # set False to not propagate to parent logger (django)
+        "db_file": {
+            "level": "DEBUG",  # set DEBUG to log all SQL queries
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/db.log"),
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["django_file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "harvester": {
+            "handlers": ["harvester_file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.db.backends": {
+            "handlers": ["db_file"],
+            "level": "DEBUG",
+            "propagate": False,  # set False to not propagate to parent logger (django)
         },
     },
 }
