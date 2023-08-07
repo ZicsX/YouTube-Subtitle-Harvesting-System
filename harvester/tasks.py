@@ -1,10 +1,8 @@
 from celery import shared_task
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
-from youtubeapi.utils import categorize, random_sentence
-
+from youtubeapi.utils import Tagger, random_sentence
 from .models import Video, Query, NoSubtitle, SystemState
-import random
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,6 +12,7 @@ logger = logging.getLogger(__name__)
 def search_and_download():
     youtube_api = YouTubeAPI()
     subtitle_downloader = YouTubeSubtitleDownloader()
+    tagger = Tagger("category/tags")
 
     while True:
         try:
@@ -51,7 +50,7 @@ def search_and_download():
 
                     if subtitles:
                         #Get categories
-                        categories = categorize(text)
+                        categories = tagger.tag_string(text)
                         # Storing the video_id and its subtitles
                         Video.objects.create(video_id=video_id, subtitle=subtitles, categories=categories)
 
