@@ -30,16 +30,24 @@ class YouTubeAPI:
         try:
             search_request = self.youtube.search().list(
                 q=query,
-                part="id",
+                part="snippet",  # Include 'snippet' to get video details like title and description
                 type="video",
                 videoCaption="closedCaption",
                 maxResults=50,
             )
             # Executing the search request
             search_results = search_request.execute()
-            # Extracting video IDs
-            video_ids = [item["id"]["videoId"] for item in search_results["items"]]
-            return video_ids
+
+            # Extracting video IDs and the concatenated text
+            video_data = [
+                (
+                    item["id"]["videoId"],
+                    (item["snippet"]["title"] + " " + item["snippet"]["description"]).lower(),
+                )
+                for item in search_results["items"]
+            ]
+
+            return video_data
         except HttpError as e:
             logger.error(f"A HttpError occurred while searching for videos: {str(e)}")
             if e.resp.status == 403:  # If the API quota is exhausted
