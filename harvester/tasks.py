@@ -1,7 +1,9 @@
 from celery import shared_task
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
-from .models import Video, Query, NoHindiSubtitle, SystemState
+from youtubeapi.utils import categorize, random_sentence
+
+from .models import Video, Query, NoSubtitle, SystemState
 import random
 import logging
 
@@ -27,7 +29,7 @@ def search_and_download():
                 return
             try:
                 # Searching for videos using the query
-                video_ids = youtube_api.search_videos(query.query)
+                video_data = youtube_api.search_videos(query.query)
                 try:
                     # Deleting the used query
                     query.delete()
@@ -37,7 +39,7 @@ def search_and_download():
                 logger.error(f"Error occurred while searching videos: {e}")
                 return
 
-            for video_id in video_ids:
+            for video_id, text in video_data:
                 # Checking if the video already exists in the database
                 video_exists = Video.objects.filter(video_id=video_id).exists()
                 if video_exists:
@@ -48,16 +50,17 @@ def search_and_download():
                     subtitles = subtitle_downloader.download_subtitle(video_id)
 
                     if subtitles:
+                        #Get categories
+                        categories = categorize(text)
                         # Storing the video_id and its subtitles
-                        Video.objects.create(video_id=video_id, subtitle=subtitles)
+                        Video.objects.create(video_id=video_id, subtitle=subtitles, categories=categories)
 
                         # Generating a new query using a random sentence from the subtitles
-                        sentences = subtitles.split(" ... ")
-                        new_query = random.choice(sentences)
+                        new_query = random_sentence(subtitles)
                         Query.objects.create(query=new_query)
 
                     else:
-                        NoHindiSubtitle.objects.create(video_id=video_id)
+                        NoSubtitle.objects.create(video_id=video_id)
 
                 except Exception as e:
                     logger.error(

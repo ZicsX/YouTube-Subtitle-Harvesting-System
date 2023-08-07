@@ -10,3 +10,6 @@ def random_sentence(subtitle):
         if substring
     ]
     return random.choice(subList)
+
+def categorize(text):
+    return 'random'
