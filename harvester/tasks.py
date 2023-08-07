@@ -1,7 +1,7 @@
 from celery import shared_task
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
-from youtubeapi.utils import Tagger, random_sentence
+from youtubeapi.utils import Tagger
 from .models import Video, Query, NoSubtitle, SystemState
 import logging
 
@@ -55,7 +55,7 @@ def search_and_download():
                         Video.objects.create(video_id=video_id, subtitle=subtitles, categories=categories)
 
                         # Generating a new query using a random sentence from the subtitles
-                        new_query = random_sentence(subtitles)
+                        new_query = tagger.random_sentence(subtitles)
                         Query.objects.create(query=new_query)
 
                     else:

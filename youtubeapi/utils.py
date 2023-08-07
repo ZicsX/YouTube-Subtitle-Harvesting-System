@@ -3,13 +3,6 @@ import re
 import random
 import string
 
-def random_sentence(subtitle):
-    subList = [
-        substring
-        for substring in re.split(r"\s*\.\.\.\s*|\n|\xa0", subtitle)
-        if substring
-    ]
-    return random.choice(subList)
 
 class Tagger:
     def __init__(self, file_path):
@@ -55,3 +48,10 @@ class Tagger:
 
         matched_tags = [token for token in tokens if token in self.tags]
         return ", ".join(matched_tags)
+    
+    def random_sentence(subtitle):
+        sentence = subtitle.split(" ... ")
+        sentence = random.choice(sentence)
+
+        sentence = re.sub(r'\s+', ' ', sentence).strip()
+        return sentence.lower()
