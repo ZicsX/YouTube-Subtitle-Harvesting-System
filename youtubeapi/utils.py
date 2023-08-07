@@ -22,23 +22,33 @@ class Tagger:
                 normalized_tag = self.normalize(line.strip())
                 self.tags.add(normalized_tag)
 
-    def clean_text(self, text):
+    def (self, text):
         # Remove URLs
-        text = re.sub(r'http\S+', '', text)
-
+        text = re.sub(r'https?://\S+|www\.\S+|ftp://\S+', '', text)
+        
         # Sanitize hashtags
         text = text.replace("#", "")
 
+        # Handle mentions by removing them
+        text = re.sub(r'@\w+', '', text)
+
+        # Remove emojis
+        text = text.encode('utf-8', 'ignore').decode('utf-8')
+        text = re.sub(r'[\U00010000-\U0010ffff]', '', text)
+        
         # Remove punctuation except for hyphens and pipes
         allowed = set('-|')
         punctuation = ''.join(ch for ch in string.punctuation if ch not in allowed)
         text = text.translate(str.maketrans('', '', punctuation))
         
-        return text
+        # Replace multiple spaces with a single space
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        return text.lower()
 
     def normalize(self, text):
-        text = self.clean_text(text).lower()
-        return text.lower().strip()
+        text = self.clean_text(text)
+        return text.strip()
 
     def tag_string(self, input_string):
         tokens = self.normalize(input_string).split()
