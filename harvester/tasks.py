@@ -14,62 +14,58 @@ tagger = Tagger("category/tags")
 
 @shared_task()
 def search_and_download():
-    global youtube_api, subtitle_downloader, tagger
 
-    while True:
+    # Check the system state
+    state = SystemState.objects.first()
+    if state is None or not state.is_running:
+        return
+    
+    query = Query.objects.filter(visited=False).first()
+
+    if query is None:
+        logger.warning(
+            "No query found in the database. Please add queries to start harvesting subtitles."
+        )
+        return
+    try:
+        query.visited = True
+        query.save()
+        # Searching for videos using the query
+        video_data = youtube_api.search_videos(query.query)
+    except Exception as e:
+        logger.error(f"Error occurred while searching videos: {e}")
+        return
+
+    for video_id, text in video_data:
+        # Checking if the video already exists in the database
+        video_exists = Video.objects.filter(video_id=video_id).exists()
+        if video_exists:
+            logger.info(f"Video ID {video_id} already exists in the database.")
+            continue
         try:
-            # Check the system state
-            state = SystemState.objects.first()
-            if state is None or not state.is_running:
-                break
-            query = Query.objects.filter(visited=False).first()
+            # Checking and Downloading the subtitles
+            subtitles = subtitle_downloader.download_subtitle(video_id)
 
-            if query is None:
-                logger.warning(
-                    "No query found in the database. Please add queries to start harvesting subtitles."
+            if subtitles:
+                # Get categories
+                categories = tagger.tag_string(text)
+                # Storing the video_id and its subtitles
+                Video.objects.create(
+                    video_id=video_id, subtitle=subtitles, categories=categories
                 )
-                return
-            try:
-                q = query.query
-                query.visited = True
-                query.save()
-                # Searching for videos using the query
-                video_data = youtube_api.search_videos(q)
-            except Exception as e:
-                logger.error(f"Error occurred while searching videos: {e}")
-                return
 
-            for video_id, text in video_data:
-                # Checking if the video already exists in the database
-                video_exists = Video.objects.filter(video_id=video_id).exists()
-                if video_exists:
-                    logger.info(f"Video ID {video_id} already exists in the database.")
-                    continue
-                try:
-                    # Checking and Downloading the subtitles
-                    subtitles = subtitle_downloader.download_subtitle(video_id)
+                # Generating a new query using a random sentence from the subtitles
+                new_query = tagger.random_sentence(subtitles)
+                Query.objects.create(query=new_query)
 
-                    if subtitles:
-                        # Get categories
-                        categories = tagger.tag_string(text)
-                        # Storing the video_id and its subtitles
-                        Video.objects.create(
-                            video_id=video_id, subtitle=subtitles, categories=categories
-                        )
+            else:
+                NoSubtitle.objects.create(video_id=video_id)
 
-                        # Generating a new query using a random sentence from the subtitles
-                        new_query = tagger.random_sentence(subtitles)
-                        Query.objects.create(query=new_query)
-
-                    else:
-                        NoSubtitle.objects.create(video_id=video_id)
-
-                except Exception as e:
-                    logger.error(
-                        f"Error occurred while downloading CC of video ID {video_id}: {e}"
-                    )
-                    continue
         except Exception as e:
-            # Handle exception
-            logger.error(f"Error occurred: {e}")
-            break
+            logger.error(
+                f"Error occurred while downloading CC of video ID {video_id}: {e}"
+            )
+            continue
+    # Recursive call for continuous execution
+    search_and_download.delay()
+    
