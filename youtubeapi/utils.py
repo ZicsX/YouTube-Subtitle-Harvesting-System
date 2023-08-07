@@ -22,7 +22,7 @@ class Tagger:
                 normalized_tag = self.normalize(line.strip())
                 self.tags.add(normalized_tag)
 
-    def (self, text):
+    def clean_text(self, text):
         # Remove URLs
         text = re.sub(r'https?://\S+|www\.\S+|ftp://\S+', '', text)
         
