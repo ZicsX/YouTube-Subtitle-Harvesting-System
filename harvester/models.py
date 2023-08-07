@@ -22,7 +22,7 @@ class SystemState(models.Model):
     is_running = models.BooleanField(default=False)
 
 
-class NoHindiSubtitle(models.Model):
+class NoSubtitle(models.Model):
     video_id = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
