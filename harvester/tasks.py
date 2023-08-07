@@ -5,14 +5,16 @@ from youtubeapi.utils import Tagger
 from .models import Video, Query, NoSubtitle, SystemState
 import logging
 
+
 logger = logging.getLogger(__name__)
+youtube_api = YouTubeAPI()
+subtitle_downloader = YouTubeSubtitleDownloader()
+tagger = Tagger("category/tags")
 
 
 @shared_task()
 def search_and_download():
-    youtube_api = YouTubeAPI()
-    subtitle_downloader = YouTubeSubtitleDownloader()
-    tagger = Tagger("category/tags")
+    global youtube_api, subtitle_downloader, tagger
 
     while True:
         try:
@@ -20,20 +22,19 @@ def search_and_download():
             state = SystemState.objects.first()
             if state is None or not state.is_running:
                 break
-            query = Query.objects.order_by("?").first()
+            query = Query.objects.filter(visited=False).first()
+
             if query is None:
                 logger.warning(
                     "No query found in the database. Please add queries to start harvesting subtitles."
                 )
                 return
             try:
+                q = query.query
+                query.visited = True
+                query.save()
                 # Searching for videos using the query
-                video_data = youtube_api.search_videos(query.query)
-                try:
-                    # Deleting the used query
-                    query.delete()
-                except Exception as e:
-                    logger.error(f"Error occurred while deleting query: {e}")
+                video_data = youtube_api.search_videos(q)
             except Exception as e:
                 logger.error(f"Error occurred while searching videos: {e}")
                 return
@@ -49,10 +50,12 @@ def search_and_download():
                     subtitles = subtitle_downloader.download_subtitle(video_id)
 
                     if subtitles:
-                        #Get categories
+                        # Get categories
                         categories = tagger.tag_string(text)
                         # Storing the video_id and its subtitles
-                        Video.objects.create(video_id=video_id, subtitle=subtitles, categories=categories)
+                        Video.objects.create(
+                            video_id=video_id, subtitle=subtitles, categories=categories
+                        )
 
                         # Generating a new query using a random sentence from the subtitles
                         new_query = tagger.random_sentence(subtitles)
@@ -63,7 +66,7 @@ def search_and_download():
 
                 except Exception as e:
                     logger.error(
-                        f"Error occurred while processing video ID {video_id}: {e}"
+                        f"Error occurred while downloading CC of video ID {video_id}: {e}"
                     )
                     continue
         except Exception as e:
