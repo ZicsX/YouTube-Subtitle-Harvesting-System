@@ -1,7 +1,7 @@
 from celery import shared_task
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
-from .models import Video, Query, SystemState
+from .models import Video, Query, NoHindiSubtitle, SystemState
 import random
 import logging
 
@@ -43,19 +43,21 @@ def search_and_download():
                 if video_exists:
                     logger.info(f"Video ID {video_id} already exists in the database.")
                     continue
-
                 try:
-                    # Checking if the video has Hindi captions
-                    if youtube_api.check_hindi_captions(video_id):
-                        # Downloading the subtitles
-                        subtitles = subtitle_downloader.download_subtitle(video_id)
-                        # Storing the video and its subtitles
+                    # Checking and Downloading the subtitles
+                    subtitles = subtitle_downloader.download_subtitle(video_id)
+
+                    if subtitles:
+                        # Storing the video_id and its subtitles
                         Video.objects.create(video_id=video_id, subtitle=subtitles)
 
                         # Generating a new query using a random sentence from the subtitles
                         sentences = subtitles.split(" ... ")
                         new_query = random.choice(sentences)
                         Query.objects.create(query=new_query)
+
+                    else:
+                        NoHindiSubtitle.objects.create(video_id=video_id)
 
                 except Exception as e:
                     logger.error(
