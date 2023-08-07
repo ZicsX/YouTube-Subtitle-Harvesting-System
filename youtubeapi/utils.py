@@ -50,9 +50,14 @@ class Tagger:
 
         return ", ".join(matched_tags)
     
-    def random_sentence(subtitle):
-        sentence = subtitle.split(" ... ")
-        sentence = random.choice(sentence)
+    def random_sentence(self, subtitle):
+        punctuation_pattern = r"\s*\.\.\.\s*|\n|\xa0|\s*[" + re.escape(string.punctuation) + r"।]\s*"
+        subList = [
+            substring
+            for substring in re.split(punctuation_pattern, subtitle)
+            if substring
+        ]
 
+        sentence = random.choice(subList).lower()
         sentence = re.sub(r'\s+', ' ', sentence).strip()
-        return sentence.lower()
+        return sentence
