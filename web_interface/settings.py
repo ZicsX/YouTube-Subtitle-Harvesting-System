@@ -146,22 +146,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Logging
 
 
-class HideSensitiveDataFilter(logging.Filter):
-    def filter(self, record):
-        if 'INSERT INTO "harvester_video"' in record.msg:
-            record.msg = re.sub(r"VALUES \(.*\);", "VALUES ([Hidden]);", record.msg)
-        elif 'INSERT INTO "harvester_query"' in record.msg:
-            record.msg = re.sub(r"VALUES \(.*\).*;", "VALUES ([Hidden]);", record.msg)
-        return True
-
-
 LOGGING = {
     "version": 1,
-    "filters": {
-        "hide_sensitive": {
-            "()": HideSensitiveDataFilter,
-        },
-    },
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
@@ -187,7 +173,7 @@ LOGGING = {
             "formatter": "verbose",
         },
         "db_file": {
-            "level": "DEBUG",  # set DEBUG to log all SQL queries
+            "level": "INFO",  # set INFO to log only higher level messages, not SQL queries
             "class": "logging.FileHandler",
             "filename": os.path.join(BASE_DIR, "logs/db.log"),
             "formatter": "verbose",
@@ -206,7 +192,7 @@ LOGGING = {
         },
         "django.db.backends": {
             "handlers": ["db_file"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,  # set False to not propagate to parent logger (django)
         },
     },
