@@ -46,7 +46,8 @@ class Tagger:
     def tag_string(self, input_string):
         tokens = self.normalize(input_string).split()
 
-        matched_tags = [token for token in tokens if token in self.tags]
+        matched_tags = set([token for token in tokens if token in self.tags])
+
         return ", ".join(matched_tags)
     
     def random_sentence(subtitle):
