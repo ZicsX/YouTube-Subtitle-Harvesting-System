@@ -50,7 +50,7 @@ def search_and_download():
     # Fetch system state
     state = get_system_state()
 
-    if state is None or not state.is_running:
+    if not state.is_running:
         return
 
     query = Query.objects.filter(visited=False).first()
