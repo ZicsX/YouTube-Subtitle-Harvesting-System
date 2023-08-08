@@ -1,18 +1,23 @@
+import os
 import logging
+from dotenv import load_dotenv
+from django.db import transaction
 from youtubeapi.utils import Tagger
+from django.core.cache import cache
 from celery import shared_task, group
 from youtubeapi.youtube import YouTubeAPI
-from youtubeapi.downloader import YouTubeSubtitleDownloader
 from .models import Video, Query, NoSubtitle
 from .utils.cache_utils import get_system_state
-from django.core.cache import cache
-from django.db import transaction
+from harvester.utils.s3_utils import S3SubtitleManager
+from youtubeapi.downloader import YouTubeSubtitleDownloader
 
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 youtube_api = YouTubeAPI()
 subtitle_downloader = YouTubeSubtitleDownloader()
 tagger = Tagger("category/tags")
+s3_manager = S3SubtitleManager(bucket_name=os.environ.get("BUCKET_NAME"))
 
 
 @transaction.atomic
@@ -38,13 +43,20 @@ from django.db.utils import IntegrityError
 @shared_task
 def download_subtitle_for_video(video_id, text):
     try:
+        if s3_manager.subtitle_exists(video_id):
+            logger.info(f"Subtitle for video ID {video_id} already exists in S3.")
+            return
+        
         subtitles = subtitle_downloader.download_subtitle(video_id)
         if subtitles:
             categories = tagger.tag_string(text)
             new_query = tagger.random_sentence(subtitles)
+            
+            # Upload to S3
+            s3_manager.upload_subtitle(video_id, subtitles)
 
             try:
-                Video.objects.create(video_id=video_id, subtitle=subtitles, categories=categories)
+                Video.objects.create(video_id=video_id, categories=categories)
                 Query.objects.create(query=new_query)
             except IntegrityError:
                 logger.info(f"Video ID {video_id} already exists in the database.")
