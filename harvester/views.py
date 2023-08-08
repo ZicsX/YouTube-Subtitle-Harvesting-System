@@ -2,11 +2,12 @@ import json
 import logging
 from django.shortcuts import render
 from django.http import HttpResponse
-from harvester.models import SystemState
 from youtubeapi.models import APIKey
 from harvester.tasks import search_and_download
 from django.views.decorators.csrf import csrf_exempt
 from .utils.cache_utils import get_system_state, set_system_state
+from django.core.cache import cache
+from web_interface.celery import app
 
 
 logger = logging.getLogger(__name__)
@@ -18,20 +19,6 @@ def home(request):
 
 
 def start_process(request):
-    state, created = SystemState.objects.get_or_create(
-        pk=1, defaults={"is_running": True}
-    )
-    if not created:
-        state.is_running = True
-        state.save()
-    logger.info("Harvesting process started")
-
-    # Dispatch the celery task
-    search_and_download.delay()
-
-    return HttpResponse("Process started")
-
-def start_process(request):
     set_system_state(True)
     logger.info("Harvesting process started")
     search_and_download.delay()
@@ -41,6 +28,11 @@ def start_process(request):
 def stop_process(request):
     set_system_state(False)
     logger.info("Harvesting process stopped")
+    # Fetch the task id and revoke it
+    task_id = cache.get('search_and_download_task_id')
+    if task_id:
+        app.control.revoke(task_id)
+        cache.delete('search_and_download_task_id')  # Optional: clear the task id from cache
     return HttpResponse("Process stopped")
 
 

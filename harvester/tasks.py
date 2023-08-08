@@ -5,6 +5,7 @@ from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
 from .models import Video, Query, NoSubtitle
 from .utils.cache_utils import get_system_state
+from django.core.cache import cache
 
 
 logger = logging.getLogger(__name__)
@@ -45,8 +46,11 @@ def download_subtitle_for_video(video_id, text):
         logger.error(f"Error occurred while downloading CC of video ID {video_id}: {e}")
 
 
-@shared_task()
-def search_and_download():
+@shared_task(bind=True)
+def search_and_download(self):
+    # Store the task id in the cache
+    cache.set('search_and_download_task_id', self.request.id)
+
     # Fetch system state
     state = get_system_state()
 
