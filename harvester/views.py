@@ -39,14 +39,8 @@ def start_process(request):
 
 
 def stop_process(request):
-    state, created = SystemState.objects.get_or_create(
-        pk=1, defaults={"is_running": False}
-    )
-    if not created:
-        state.is_running = False
-        state.save()
+    set_system_state(False)
     logger.info("Harvesting process stopped")
-
     return HttpResponse("Process stopped")
 
 
