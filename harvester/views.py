@@ -1,11 +1,13 @@
+import json
+import logging
 from django.shortcuts import render
 from django.http import HttpResponse
 from harvester.models import SystemState
 from youtubeapi.models import APIKey
 from harvester.tasks import search_and_download
 from django.views.decorators.csrf import csrf_exempt
-import json
-import logging
+from .cache_utils import get_system_state, set_system_state
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,12 @@ def start_process(request):
     # Dispatch the celery task
     search_and_download.delay()
 
+    return HttpResponse("Process started")
+
+def start_process(request):
+    set_system_state(True)
+    logger.info("Harvesting process started")
+    search_and_download.delay()
     return HttpResponse("Process started")
 
 
@@ -65,21 +73,11 @@ def update_api_key(request):
 
 
 def system_status(request):
-    state, created = SystemState.objects.get_or_create(
-        pk=1, defaults={"is_running": False}
-    )
+    state = get_system_state()
     api_key, _ = APIKey.objects.get_or_create(pk=1, defaults={"key": ""})
-    if not created:
-        logger.info(
-            f"System is {'running' if state.is_running else 'stopped'}. Current API key is {api_key.key}"
-        )
-        return HttpResponse(
-            f"System is {'running' if state.is_running else 'stopped'}. Current API key is {api_key.key}"
-        )
-    else:
-        logger.info("System is stopped. No API key set.")
-        return HttpResponse("System is stopped. No API key set.")
-
-
-def queries(request):
-    return
+    logger.info(
+        f"System is {'running' if state.is_running else 'stopped'}. Current API key is {api_key.key}"
+    )
+    return HttpResponse(
+        f"System is {'running' if state.is_running else 'stopped'}. Current API key is {api_key.key}"
+    )

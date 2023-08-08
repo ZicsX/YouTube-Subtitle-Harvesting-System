@@ -3,7 +3,8 @@ from youtubeapi.utils import Tagger
 from celery import shared_task, group
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
-from .models import Video, Query, NoSubtitle, SystemState
+from .models import Video, Query, NoSubtitle
+from .cache_utils import get_system_state
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ def download_subtitle_for_video(video_id, text):
 @shared_task()
 def search_and_download():
     # Fetch system state
-    state = SystemState.objects.first()
+    state = get_system_state()
 
     if state is None or not state.is_running:
         return
