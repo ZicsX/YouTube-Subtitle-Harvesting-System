@@ -6,6 +6,7 @@ from youtubeapi.downloader import YouTubeSubtitleDownloader
 from .models import Video, Query, NoSubtitle
 from .utils.cache_utils import get_system_state
 from django.core.cache import cache
+from django.db import transaction
 
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,16 @@ youtube_api = YouTubeAPI()
 subtitle_downloader = YouTubeSubtitleDownloader()
 tagger = Tagger("category/tags")
 
+
+@transaction.atomic
+def get_unvisited_query():
+    query = Query.objects.select_for_update().filter(visited=False).first()
+
+    if query:
+        query.visited = True
+        query.save()
+
+    return query
 
 def search_videos(query):
     try:
@@ -57,18 +68,13 @@ def search_and_download(self):
     if not state.is_running:
         return
 
-    query = Query.objects.filter(visited=False).first()
+    query = get_unvisited_query()
 
     if query is None:
         logger.warning(
             "No query found in the database. Please add queries to start harvesting subtitles."
         )
-        state.is_running = False
-        state.save()
         return
-
-    query.visited = True
-    query.save()
 
     # Searching for videos using the query
     video_data = search_videos(query.query)
