@@ -6,7 +6,7 @@ from harvester.models import SystemState
 from youtubeapi.models import APIKey
 from harvester.tasks import search_and_download
 from django.views.decorators.csrf import csrf_exempt
-from .cache_utils import get_system_state, set_system_state
+from .utils.cache_utils import get_system_state, set_system_state
 
 
 logger = logging.getLogger(__name__)

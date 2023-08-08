@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from .models import SystemState
+from ..models import SystemState
 
 def get_system_state():
     state = cache.get('system_state')

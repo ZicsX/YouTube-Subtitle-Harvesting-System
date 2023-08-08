@@ -4,7 +4,7 @@ from celery import shared_task, group
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
 from .models import Video, Query, NoSubtitle
-from .cache_utils import get_system_state
+from .utils.cache_utils import get_system_state
 
 
 logger = logging.getLogger(__name__)
