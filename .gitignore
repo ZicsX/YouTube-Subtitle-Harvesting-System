@@ -6,4 +6,3 @@ hindi_subtitles.csv
 __pycache__
 logs/
 .env
-**/migrations/*
