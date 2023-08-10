@@ -4,5 +4,4 @@ hindi_subtitles.csv
 .gitignore
 **/__pycache__
 __pycache__
-logs/
 .env
