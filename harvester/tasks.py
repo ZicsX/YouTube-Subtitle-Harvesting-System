@@ -1,5 +1,5 @@
 import logging
-from youtubeapi.utils import Tagger
+from harvester.utils.tag import Tagger
 from celery import shared_task, group
 from youtubeapi.youtube import YouTubeAPI
 from youtubeapi.downloader import YouTubeSubtitleDownloader
