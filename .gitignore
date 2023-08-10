@@ -5,3 +5,5 @@ hindi_subtitles.csv
 **/__pycache__
 __pycache__
 .env
+*/migrations/*
+!*/migrations/__init__.py

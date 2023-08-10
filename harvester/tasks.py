@@ -10,9 +10,6 @@ from django.db import transaction
 
 
 logger = logging.getLogger(__name__)
-youtube_api = YouTubeAPI()
-subtitle_downloader = YouTubeSubtitleDownloader()
-tagger = Tagger("category/tags")
 
 
 @transaction.atomic
@@ -25,8 +22,10 @@ def get_unvisited_query():
 
     return query
 
+
 def search_videos(query):
     try:
+        youtube_api = YouTubeAPI()
         return youtube_api.search_videos(query)
     except Exception as e:
         logger.error(f"Error occurred while searching videos: {e}")
@@ -35,8 +34,12 @@ def search_videos(query):
 
 from django.db.utils import IntegrityError
 
+
 @shared_task
 def download_subtitle_for_video(video_id, text):
+    subtitle_downloader = YouTubeSubtitleDownloader()
+    tagger = Tagger("category/tags")
+
     try:
         subtitles = subtitle_downloader.download_subtitle(video_id)
         if subtitles:
@@ -44,7 +47,9 @@ def download_subtitle_for_video(video_id, text):
             new_query = tagger.random_sentence(subtitles)
 
             try:
-                Video.objects.create(video_id=video_id, subtitle=subtitles, categories=categories)
+                Video.objects.create(
+                    video_id=video_id, subtitle=subtitles, categories=categories
+                )
                 Query.objects.create(query=new_query)
             except IntegrityError:
                 logger.info(f"Video ID {video_id} already exists in the database.")
@@ -52,7 +57,9 @@ def download_subtitle_for_video(video_id, text):
             try:
                 NoSubtitle.objects.create(video_id=video_id)
             except IntegrityError:
-                logger.info(f"Video ID {video_id} is already marked as NoSubtitle in the database.")
+                logger.info(
+                    f"Video ID {video_id} is already marked as NoSubtitle in the database."
+                )
     except Exception as e:
         logger.error(f"Error occurred while downloading CC of video ID {video_id}: {e}")
 
@@ -60,7 +67,7 @@ def download_subtitle_for_video(video_id, text):
 @shared_task(bind=True)
 def search_and_download(self):
     # Store the task id in the cache
-    cache.set('search_and_download_task_id', self.request.id)
+    cache.set("search_and_download_task_id", self.request.id)
 
     # Fetch system state
     state = get_system_state()
