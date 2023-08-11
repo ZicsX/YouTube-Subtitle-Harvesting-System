@@ -1,7 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
-from django.db import transaction
+from django.db import transaction, connection
 from django.core.cache import cache
 from celery import shared_task, group
 from youtubeapi.youtube import YouTubeAPI
@@ -17,15 +17,33 @@ logger = logging.getLogger(__name__)
 s3_manager = S3SubtitleManager(bucket_name=os.environ.get("BUCKET_NAME"))
 
 
-@transaction.atomic
 def get_unvisited_query():
-    query = Query.objects.select_for_update().filter(visited=False).first()
+    try:
+        with connection.cursor() as cursor:
+            with transaction.atomic():
+                cursor.execute("""
+                    SELECT id, query 
+                    FROM HARVESTER_QUERY 
+                    WHERE visited = 0 AND ROWNUM = 1 
+                    FOR UPDATE NOWAIT
+                """)
+                row = cursor.fetchone()
 
-    if query:
-        query.visited = True
-        query.save()
+                if row is None:
+                    return None
 
-    return query
+                # Update visited 
+                cursor.execute("""
+                    UPDATE HARVESTER_QUERY 
+                    SET visited = 1 
+                    WHERE id = %s
+                """, [row[0]])
+
+                # Return query
+                return row[1]
+
+    except Exception as e:
+        return None
 
 
 def search_videos(query):
@@ -94,7 +112,7 @@ def search_and_download(self):
         return
 
     # Searching for videos using the query
-    video_data = search_videos(query.query)
+    video_data = search_videos(query)
 
     # Group all video downloading tasks and execute them in parallel.
     group(
