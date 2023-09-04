@@ -18,7 +18,7 @@ class YouTubeSubtitleDownloader:
             transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
             try:
                 transcript = transcripts.find_manually_created_transcript(['hi']).fetch()
-                full_transcript = " ... ".join(entry["text"] for entry in transcript)
+                full_transcript = "\n".join(entry["text"] for entry in transcript)
                 return full_transcript
             except NoTranscriptFound:
                 for transcript in transcripts:
